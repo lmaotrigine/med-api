@@ -2,10 +2,10 @@
 Description=Random API
 After=network-online.target
 [Service]
-WorkingDirectory=/home/api/med-api
+WorkingDirectory=/home/ubuntu/api/med-api
 User=ubuntu
 Group=ubuntu
-ExecStart=/home/api/med-api/venv/bin/hypercorn --bind '0.0.0.0:5445' app:app
+ExecStart=/home/ubuntu/api/med-api/venv/bin/hypercorn --bind '0.0.0.0:5445' app:app
 Type=simple
 Restart=always
 
