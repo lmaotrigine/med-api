@@ -1,4 +1,4 @@
-![License](https://img.shields.io/github/license/darthshittious/med-api)
+[![License](https://img.shields.io/github/license/darthshittious/med-api)](LICENSE)
 
 # A Very Random API
 
