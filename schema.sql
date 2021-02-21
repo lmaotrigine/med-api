@@ -13,8 +13,7 @@ CREATE TABLE IF NOT EXISTS patients (
     sex TEXT,
     occupation TEXT,
     date_of_admission DATE,
-    next_of_kin_id INTEGER,
-    FOREIGN KEY (next_of_kin_id) REFERENCES relations (id) ON DELETE CASCADE
+    next_of_kin_id INTEGER
 );
 
 CREATE TABLE  IF NOT EXISTS examinations (

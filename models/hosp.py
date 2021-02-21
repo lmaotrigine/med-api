@@ -70,6 +70,6 @@ class Patient(Person):
             await self.fetch_history(con=con)
         date = date or datetime.date.today()
         query = 'INSERT INTO examinations (patient_id, date, summary, details) VALUES ($1, $2, $3, $4) RETURNING *;'
-        record = await con.fetchrow(query, date, summary, details)
+        record = await con.fetchrow(query, self.id, date, summary, details)
         self.history.insert(0, Examination.build_from_record(record))
         return self.history
