@@ -56,7 +56,7 @@ async def get_patient_data(id):
     data = await request.json
     record = await app.pool.fetchrow('SELECT * FROM patients WHERE id = $1;', id)
     patient = Patient.build_from_record(record)
-    async with app.pool.acquire as con:
+    async with app.pool.acquire() as con:
         if request.method == 'GET':
             history = await patient.fetch_history(con=con)
         else:
@@ -93,11 +93,11 @@ async def post_patient_stats():
     query = 'INSERT INTO relations (name, age, sex, occupation) VALUES ($1, $2, $3, $4) RETURNING *;'
     next_of_kin = await app.pool.fetchrow(query, *nok)
     query = "INSERT INTO patients (name, age, sex, occupation, date_of_admission, next_of_kin_id) VALUES " \
-            "($1, $2, $3, $4, $5, %6) RETURNING *;"
-    patient = await app.pool.fetchrow(query, data['name'], data['age'], data['sex'], data['occupation'], data['doa'],
+            "($1, $2, $3, $4, $5, $6) RETURNING *;"
+    patient = await app.pool.fetchrow(query, data['name'], data['age'], data['sex'], data['occupation'], datetime.strptime(data['doa'], '%d %b %Y').date(),
                                       next_of_kin['id'])
     return redirect('/patients/{}'.format(patient['id']))
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=5445)
