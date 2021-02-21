@@ -52,7 +52,7 @@ class Patient(Person):
     async def get_next_of_kin(self, con: asyncpg.Connection):
         if self.next_of_kin is not None:
             return self.next_of_kin
-        query = 'SELECT * FROM relations WHERE id = $2;'
+        query = 'SELECT * FROM relations WHERE id = $1;'
         record = await con.fetchrow(query, self.next_of_kin_id)
         self.next_of_kin = Person.build_from_record(record)
         return self.next_of_kin

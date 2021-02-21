@@ -92,10 +92,9 @@ async def post_patient_stats():
     nok = (nok['name'], nok['age'], nok['sex'], nok['occupation'])
     query = 'INSERT INTO relations (name, age, sex, occupation) VALUES ($1, $2, $3, $4) RETURNING *;'
     next_of_kin = await app.pool.fetchrow(query, *nok)
-    query = "INSERT INTO patients (name, age, sex, occupation, date_of_admission, next_of_kin_id) VALUES " \
-            "($1, $2, $3, $4, $5, $6) RETURNING *;"
-    patient = await app.pool.fetchrow(query, data['name'], data['age'], data['sex'], data['occupation'], datetime.strptime(data['doa'], '%d %b %Y').date(),
-                                      next_of_kin['id'])
+    query = "INSERT INTO patients (name, age, sex, occupation, date_of_admission) VALUES " \
+            "($1, $2, $3, $4, $5) RETURNING *;"
+    patient = await app.pool.fetchrow(query, data['name'], data['age'], data['sex'], data['occupation'], datetime.strptime(data['doa'], '%d %b %Y').date())
     return redirect('/patients/{}'.format(patient['id']))
 
 
