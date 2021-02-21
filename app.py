@@ -98,5 +98,20 @@ async def post_patient_stats():
     return redirect('/patients/{}'.format(patient['id']))
 
 
+@app.route('/patients/<int:id>/<int:exam_id>', methods=['GET', 'POST'])
+async def get_examination(id, exam_id):
+    if request.headers.get('Authorization') != config.api_key:
+        if request.args.get('key') != config.api_key:
+            return 'Not authorised', 401
+    exam = await app.pool.fetchrow('SELECT * FROM examinations WHERE id = $1;')
+    if request.method == 'GET':
+        return dict(**exam)
+    data = await request.json
+    exam = Examination.build_from_record(exam)
+    async with app.pool.acquire() as con:
+        exam = await exam.amend(con, **data)
+    return exam.__dict__
+
+
 if __name__ == '__main__':
     app.run(port=5445)

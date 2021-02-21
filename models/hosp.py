@@ -16,6 +16,18 @@ class Examination:
     def build_from_record(cls, record):
         return cls(id=record['id'], date=record['date'], summary=record['summary'], details=record['details'], patient_id=record['patient_id'])
 
+    async def amend(self, *, con: asyncpg.Connection, summary=None, details=None):
+        data = []
+        if summary is not None:
+            data.append({'summary': summary})
+        if details is not None:
+            data.append({'details': details})
+        if not data:
+            return
+        query = f"UPDATE examinations SET {', '.join(f'{x} = ${i + 2}' for i, x in enumerate(data.keys()))} WHERE id = $1 RETURNING *;"
+        rec = await con.fetchrow(query, self.id *data.values())
+        self = self.build_from_record(rec)
+        return self
 
 @dataclass
 class Person:
