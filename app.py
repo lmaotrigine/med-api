@@ -1,13 +1,26 @@
-from datetime import date, timedelta
-from quart import Quart, request, abort
+import asyncpg
+from datetime import date, datetime, timedelta
+from quart import Quart, request, abort, redirect
 from utils.time import Time
+from models import Examination, Patient
+import config
 
 app = Quart(__name__)
 
 
+@app.before_serving
+async def setup_pool():
+    app.pool = await asyncpg.create_pool(config.postgresql)
+
+
+@app.after_serving
+async def close_pool():
+    await app.pool.close()
+
+
 @app.route('/')
 def hello_world():
-    return 'VJ#9010 on Discord. Feature requests rarely accepted.'
+    return '<samp>VJ#9010 on Discord. Feature requests rarely accepted.</samp>'
 
 
 @app.route('/gestation')
@@ -32,6 +45,58 @@ async def get_gestation_age():
 
     gest_age = divmod((date.today() - dt.dt.date() - timedelta(days=7)).days, 7)
     return {'lmp': dt.dt.date().strftime('%d %b %Y'), 'edd': edd, 'gestation_age': gest_age[0] + gest_age[1] * 0.1}
+
+
+@app.route('/patients/<int:id>', methods=['GET', 'POST'])
+async def get_patient_data(id):
+    if request.headers.get('Authorization') != config.api_key:
+        if request.args.get('key') != config.api_key:
+            return 'Not Authorised', 401
+    payload = {}
+    data = await request.json
+    record = await app.pool.fetchrow('SELECT * FROM patients WHERE id = $1;', id)
+    patient = Patient.build_from_record(record)
+    async with app.pool.acquire as con:
+        if request.method == 'GET':
+            history = await patient.fetch_history(con=con)
+        else:
+            dt = data.get('date')
+            if dt is not None:
+                _date = datetime.strptime(dt, '%d %b %Y').date()
+            else:
+                _date = None
+            history = await patient.add_exam(data['summary'], data['details'], _date, con=con)
+        nok = await patient.get_next_of_kin(con=con)
+    payload.update(**patient.__dict__)
+    payload['history'] = [h.__dict__ for h in patient.history]
+    payload['next_of_kin'] = nok.__dict__
+
+    return payload
+
+
+@app.route('/patients', methods=['POST', 'GET'])
+async def post_patient_stats():
+    if request.headers.get('Authorization') != config.api_key:
+        if request.args.get('key') != config.api_key:
+            return 'Not authorised', 401
+    if request.method == 'GET':
+        data = []
+        query = 'SELECT * FROM patients ORDER BY id;'
+        patients = await app.pool.fetch(query)
+        for record in patients:
+            patient = Patient.build_from_record(record)
+            data.append(dict(name=patient.name, age=patient.age, sex=patient.sex, occupation=patient.occupation))
+        return data
+    data = await request.json
+    nok = data['next_of_kin']
+    nok = (nok['name'], nok['age'], nok['sex'], nok['occupation'])
+    query = 'INSERT INTO relations (name, age, sex, occupation) VALUES ($1, $2, $3, $4) RETURNING *;'
+    next_of_kin = await app.pool.fetchrow(query, *nok)
+    query = "INSERT INTO patients (name, age, sex, occupation, date_of_admission, next_of_kin_id) VALUES " \
+            "($1, $2, $3, $4, $5, %6) RETURNING *;"
+    patient = await app.pool.fetchrow(query, data['name'], data['age'], data['sex'], data['occupation'], data['doa'],
+                                      next_of_kin['id'])
+    return redirect('/patients/{}'.format(patient['id']))
 
 
 if __name__ == '__main__':

@@ -3,3 +3,4 @@ Hypercorn
 parsedatetime
 python-dateutil
 discord.py
+asyncpg

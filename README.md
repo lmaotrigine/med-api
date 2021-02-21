@@ -23,6 +23,15 @@ contribute. I'll accept literally anything remotely useful.
 Issues with existing functionality, or improvements thereof can be suggested, and I'll try to act on it as quick as
 possible
 
+## Docs?
+
+Too much effort as it stands now. Maybe once I add more features, I'll revisit this. For now, read docstrings.
+
+## Frontend?
+
+Nah. Frontend maintenance would prove to be too much workload for me since I struggle with even the most basic CSS. Feel
+free to make your own though.
+
 ## Rate limits, Authorisation
 
 None of that just yet. I've delegated DDoS protection to Cloudflare, and again, I expect that this won't be used by
