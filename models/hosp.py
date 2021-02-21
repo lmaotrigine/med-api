@@ -14,7 +14,7 @@ class Examination:
 
     @classmethod
     def build_from_record(cls, record):
-        return cls(record['date'], record['summary'], record['details'])
+        return cls(id=record['id'], date=record['date'], summary=record['summary'], details=record['details'], patient_id=record['patient_id'])
 
 
 @dataclass
