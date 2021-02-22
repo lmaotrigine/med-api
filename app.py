@@ -49,6 +49,10 @@ async def get_gestation_age():
 
 @app.route('/patients/<int:id>', methods=['GET', 'POST'])
 async def get_patient_data(id):
+    """GET a patient's details.
+    
+    POST an examination details to append to their history.
+    """
     if request.headers.get('Authorization') != config.api_key:
         if request.args.get('key') != config.api_key:
             return 'Not Authorised', 401
@@ -76,6 +80,10 @@ async def get_patient_data(id):
 
 @app.route('/patients', methods=['POST', 'GET'])
 async def post_patient_stats():
+    """GET basic details of all patients
+    
+    POST details of a new patient. Redirects to the new patient's page.
+    """
     if request.headers.get('Authorization') != config.api_key:
         if request.args.get('key') != config.api_key:
             return 'Not authorised', 401
@@ -98,8 +106,12 @@ async def post_patient_stats():
     return redirect('/patients/{}'.format(patient['id']))
 
 
-@app.route('/patients/<int:id>/<int:exam_id>', methods=['GET', 'POST'])
+@app.route('/patients/<int:id>/<int:exam_id>', methods=['GET', 'PATCH'])
 async def get_examination(id, exam_id):
+    """GET deetails of a specific examination for a patient.
+    
+    PATCH: Change the summary or details of an examination.
+    """
     if request.headers.get('Authorization') != config.api_key:
         if request.args.get('key') != config.api_key:
             return 'Not authorised', 401
