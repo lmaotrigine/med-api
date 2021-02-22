@@ -21,7 +21,8 @@ contribute. I'll accept literally anything remotely useful.
 ## Issues
 
 Issues with existing functionality, or improvements thereof can be suggested, and I'll try to act on it as quick as
-possible
+possible. Don't open issues to ask questions about usage or functionality. Contact me on Discord or email or maybe in
+person.
 
 ## Docs?
 
@@ -36,6 +37,9 @@ free to make your own though.
 
 None of that just yet. I've delegated DDoS protection to Cloudflare, and again, I expect that this won't be used by
 anyone but me, so implementing rate limits and authorisation (like a token system) is not in my focus right now.
+
+Patient data endpoints do have an auth system but I have no plans of exposing that to public due to issues of privacy.
+If you wish to make use of this, self-host.
 
 ## Contributing
 
