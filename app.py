@@ -1,6 +1,6 @@
 import asyncpg
 from datetime import date, datetime, timedelta
-from quart import Quart, request, abort, redirect
+from quart import Quart, request, abort, redirect, jsonify
 from utils.time import Time
 from models import Examination, Patient
 import config
@@ -86,7 +86,7 @@ async def post_patient_stats():
         for record in patients:
             patient = Patient.build_from_record(record)
             data.append(dict(name=patient.name, age=patient.age, sex=patient.sex, occupation=patient.occupation))
-        return data
+        return jsonify(data)
     data = await request.json
     nok = data['next_of_kin']
     nok = (nok['name'], nok['age'], nok['sex'], nok['occupation'])
