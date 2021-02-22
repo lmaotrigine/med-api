@@ -33,7 +33,7 @@ async def get_gestation_age():
     try:
         dt = Time(dt)
     except ValueError:
-        return 'bad request', 400
+        return '<samp>bad request</samp>', 400
     if dt._past is False:
         # pdt converts all dates to future when year isn't specified. We assume this was the case when the year is up
         # by one
@@ -51,11 +51,11 @@ async def get_gestation_age():
 async def get_patient_data(id):
     """GET a patient's details.
     
-    POST an examination details to append to their history.
+    POST examination details to append to their history.
     """
     if request.headers.get('Authorization') != config.api_key:
         if request.args.get('key') != config.api_key:
-            return 'Not Authorised', 401
+            return '<samp>Not Authorised</samp>', 401
     payload = {}
     data = await request.json
     record = await app.pool.fetchrow('SELECT * FROM patients WHERE id = $1;', id)
@@ -86,7 +86,7 @@ async def post_patient_stats():
     """
     if request.headers.get('Authorization') != config.api_key:
         if request.args.get('key') != config.api_key:
-            return 'Not authorised', 401
+            return '<samp>Not authorised</samp>', 401
     if request.method == 'GET':
         data = []
         query = 'SELECT * FROM patients ORDER BY id;'
@@ -114,7 +114,7 @@ async def get_examination(id, exam_id):
     """
     if request.headers.get('Authorization') != config.api_key:
         if request.args.get('key') != config.api_key:
-            return 'Not authorised', 401
+            return '<samp>Not authorised</samp>', 401
     exam = await app.pool.fetchrow('SELECT * FROM examinations WHERE id = $1;')
     if request.method == 'GET':
         return dict(**exam)
