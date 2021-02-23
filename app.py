@@ -1,4 +1,5 @@
 import asyncpg
+import aiohttp
 from datetime import date, datetime, timedelta
 from quart import Quart, request, abort, redirect, jsonify
 from utils.time import Time
@@ -11,11 +12,13 @@ app = Quart(__name__)
 @app.before_serving
 async def setup_pool():
     app.pool = await asyncpg.create_pool(config.postgresql)
+    app.session = aiohttp.ClientSession()
 
 
 @app.after_serving
 async def close_pool():
     await app.pool.close()
+    await app.session.close()
 
 
 @app.route('/')
@@ -123,6 +126,16 @@ async def get_examination(id, exam_id):
     async with app.pool.acquire() as con:
         exam = await exam.amend(con, **data)
     return exam.__dict__
+
+
+@app.route('/cat')
+async def random_cat():
+    """GET a random cat photo. Helps take the edge off. At least for me."""
+    async with app.session.get(config.cat_cdn) as resp:
+        if resp.status != 200:
+            return '<samp>Could not find cat :(</samp>', 500
+        js = await resp.json()
+    return f'<img src={js[0]["url"]} />'
 
 
 if __name__ == '__main__':
