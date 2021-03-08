@@ -140,26 +140,26 @@ async def random_cat():
     return f'<img src={js[0]["url"]} />'
 
 
-@app.route('/antidepressants-or-tolkien')
+@app.route('/antidepressant-or-tolkien')
 async def drug_or_tolkien():
     return '<samp>Idea based on <a href="https://twitter.com/checarina/status/977387234226855936">@checarina</a>\'s' \
-           'tweet.<br>Use the <a href="/antidepressants-or-tolkien/random">random</a> and ' \
-           '<a href="/antidepressants-or-tolkien/all">all</a> endpoints as needed.</samp>'
+           'tweet.<br>Use the <a href="/antidepressant-or-tolkien/random">random</a> and ' \
+           '<a href="/antidepressant-or-tolkien/all">all</a> endpoints as needed.</samp>'
 
 
-@app.route('/antidepressants-or-tolkien/all')
+@app.route('/antidepressant-or-tolkien/all')
 async def drug_or_tolkien_all():
     if not hasattr(app, 'drug_or_tolkien_js'):
-        with open('static/json/antidepressants_or_tolkien.json') as f:
+        with open('static/json/antidepressant_or_tolkien.json') as f:
             app.drug_or_tolkien_js = json.load(f)
     random.shuffle(app.drug_or_tolkien_js)
     return app.drug_or_tolkien_js
 
 
-@app.route('/antidepressants-or-tolkien/random')
+@app.route('/antidepressant-or-tolkien/random')
 async def drug_or_tolkien_random():
     if not hasattr(app, 'drug_or_tolkien_js'):
-        with open('static/json/antidepressants_or_tolkien.json') as f:
+        with open('static/json/antidepressant_or_tolkien.json') as f:
             app.drug_or_tolkien_js = json.load(f)
     return random.choice(app.drug_or_tolkien_js)
 
