@@ -5,6 +5,8 @@ from quart import Quart, request, abort, redirect, jsonify
 from utils.time import Time
 from models import Examination, Patient
 import config
+import json
+import random
 
 app = Quart(__name__)
 
@@ -136,6 +138,30 @@ async def random_cat():
             return '<samp>Could not find cat :(</samp>', 500
         js = await resp.json()
     return f'<img src={js[0]["url"]} />'
+
+
+@app.route('/antidepressants-or-tolkien')
+async def drug_or_tolkien():
+    return '<samp>Idea based on <a href="https://twitter.com/checarina/status/977387234226855936">@checarina</a>\'s' \
+           'tweet.<br>Use the <a href="/antidepressants-or-tolkien/random">random</a> and ' \
+           '<a href="/antidepressants-or-tolkien/all">all</a> endpoints as needed.</samp>'
+
+
+@app.route('/antidepressants-or-tolkien/all')
+async def drug_or_tolkien_all():
+    if not hasattr(app, 'drug_or_tolkien_js'):
+        with open('static/json/antidepressants_or_tolkien.json') as f:
+            app.drug_or_tolkien_js = json.load(f)
+    random.shuffle(app.drug_or_tolkien_js)
+    return app.drug_or_tolkien_js
+
+
+@app.route('/antidepressants-or-tolkien/random')
+async def drug_or_tolkien_random():
+    if not hasattr(app, 'drug_or_tolkien_js'):
+        with open('static/json/antidepressants_or_tolkien.json') as f:
+            app.drug_or_tolkien_js = json.load(f)
+    return random.choice(app.drug_or_tolkien_js)
 
 
 if __name__ == '__main__':
