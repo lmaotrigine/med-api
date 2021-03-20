@@ -1,10 +1,11 @@
 import asyncpg
 import aiohttp
 from datetime import date, datetime, timedelta
-from quart import Quart, request, abort, redirect, jsonify
+from quart import Quart, request, abort, redirect, jsonify, send_file
 from utils.time import Time
 from models import Examination, Patient
 import config
+import io
 import json
 import random
 
@@ -135,9 +136,28 @@ async def random_cat():
     """GET a random cat photo. Helps take the edge off. At least for me."""
     async with app.session.get(config.cat_cdn) as resp:
         if resp.status != 200:
-            return '<samp>Could not find cat :(</samp>', 500
+            return '<samp>Could not find cat :(</samp>', 404
         js = await resp.json()
-    return f'<img src={js[0]["url"]} />'
+    async with app.session.get(js[0]['url']) as img:
+        to_send = io.BytesIO(await img.read())
+    return await send_file(to_send, 'image')
+
+
+@app.route('/dog')
+async def random_dog():
+    """GET a random dog photo/video. This CDN is kinda wonky, you might want to redesign this when you fork."""
+    async with app.session.get(config.dog_db) as resp:
+        if resp.status != 200:
+            return '<samp>Could not find dog :(</samp>', 404
+
+        filename = await resp.text()
+        url = f'{config.dog_cdn}/{filename}'
+        async with app.session.get(url) as other:
+            if other.status != 200:
+                return '<samp>Could not download dog image/video :(</samp>', 404
+            fp = io.BytesIO(await other.read())
+        mimetype = 'video' if filename.endswith(('.mp4', '.webm')) else 'image'
+        return await send_file(fp, mimetype)
 
 
 @app.route('/antidepressant-or-tolkien')
