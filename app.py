@@ -47,9 +47,12 @@ async def get_gestation_age():
             dt.dt = dt.dt.replace(year=date.today().year)
         else:
             return {'message': 'This date is in the future.', 'parsed_date': dt.dt.strftime('%d %b %Y')}, 400
+
+    # This is not Naegle's but is in keeping with 40 weeks of gestation.
     edd = (dt.dt.date() + timedelta(days=7 * 41)).strftime('%d %b %Y')
 
-    gest_age = divmod((date.today() - dt.dt.date() - timedelta(days=7)).days, 7)
+    # Probably missed something here
+    gest_age = divmod((date.today() - dt.dt.date()).days, 7)
     return {'lmp': dt.dt.date().strftime('%d %b %Y'), 'edd': edd, 'gestation_age': gest_age[0] + gest_age[1] * 0.1}
 
 
