@@ -8,6 +8,7 @@ import config
 import io
 import json
 import random
+import statistics
 
 app = Quart(__name__)
 
@@ -111,7 +112,8 @@ async def post_patient_stats():
     next_of_kin = await app.pool.fetchrow(query, *nok)
     query = "INSERT INTO patients (name, age, sex, occupation, date_of_admission, next_of_kin_id) VALUES " \
             "($1, $2, $3, $4, $5, $6) RETURNING *;"
-    patient = await app.pool.fetchrow(query, data['name'], data['age'], data['sex'], data['occupation'], datetime.strptime(data['doa'], '%d %b %Y').date(), next_of_kin['id'])
+    patient = await app.pool.fetchrow(query, data['name'], data['age'], data['sex'], data['occupation'],
+                                      datetime.strptime(data['doa'], '%d %b %Y').date(), next_of_kin['id'])
     return redirect('/patients/{}'.format(patient['id']))
 
 
@@ -185,6 +187,131 @@ async def drug_or_tolkien_random():
         with open('static/json/antidepressant_or_tolkien.json') as f:
             app.drug_or_tolkien_js = json.load(f)
     return random.choice(app.drug_or_tolkien_js)
+
+
+# central tendencies
+"""
+POST /mean; /median; /mode
+
+Request body must be JSON encoded (or follow the JSON format)
+Must be an array of numbers (integers or floating point numbers), or an array of JSON objects.
+
+JSON objects in the array can have the following keys:
+--------------------------------------------------------------------------
+Key         | Type   | Required? | Description                           |
+--------------------------------------------------------------------------
+lower_limit | Number | No*       | The lower limit of the class interval |
+upper_limit | Number | No*       | The upper limit of the class interval |
+frequency   | Number | Yes       | The frequency of this class           |
+mid         | Number | No*       | The mid point of this class interval  |
+interval    | Number | No        | The height of this class interval     |
+--------------------------------------------------------------------------
+
+* lower_limit is required for /mode
+* if mid is not specified, then both lower_limit and upper_limit need to be specified
+* if both lower_limit and upper_limit are not specified, interval needs to be specified
+"""
+
+
+def send_error_message(e):
+    if isinstance(e, Exception):
+        message = f'{e.__class__.__name__}: {e}'
+    else:
+        message = str(e)
+    print(message)
+    return {'code': 400, 'message': message}, 400
+
+
+def do_calc(data, what):
+    if not data:
+        return send_error_message('Data is empty.')
+    if type(data) != list:
+        return send_error_message('Data must be an array.')
+    if not all(x in (int, float) for x in map(type, data)) and not all(x == dict for x in map(type, data)):
+        return send_error_message('Data must be an array of JSON objects, or an array of floats.')
+    if type(data[0]) == dict:
+        arr = []
+        interval = None
+        for js in data:
+            try:
+                mid = js.get('mid') or (js['upper_limit'] + js['lower_limit']) / 2
+                if interval is None:
+                    interval = js.get('interval') or js['upper_limit'] - js['lower_limit']
+                else:
+                    if interval != js.get('interval') and interval != js['upper_limit'] - js['lower_limit']:
+                        return send_error_message('Inconsistent class intervals.')
+                arr += [mid] * js['frequency']
+            except KeyError as e:
+                return send_error_message(e)
+    else:
+        arr = [float(i) for i in data]
+        interval = 1
+    lookup = {
+        'mean': statistics.mean,
+        'median': lambda x: statistics.median_grouped(x, interval=interval),
+        'mode': statistics.multimode
+    }
+    try:
+        print(arr)
+        print({what: lookup[what](arr)})
+        return {what: lookup[what](arr)}
+    except Exception as e:
+        return send_error_message(e)
+
+
+@app.route('/mode', methods=['POST'])
+async def do_mode():
+    try:
+        data = json.loads(await request.data)
+    except Exception as e:
+        return send_error_message(e)
+    if not data:
+        return send_error_message('Data is empty.')
+    if type(data) != list:
+        return send_error_message('Data must be an array.')
+    if not all(x == dict for x in map(type, data)):
+        return do_calc(data, 'mode')
+
+    get_interval = lambda x: x.get('interval', (x['upper_limit'] - x['lower_limit']))
+    try:
+        interval = get_interval(data[0])
+        if not all(x == interval for x in map(get_interval, data)):
+            return send_error_message('Inconsistent class intervals.')
+    except KeyError as e:
+        return send_error_message(e)
+
+    try:
+        data = sorted(data, key=lambda x: x.get('mid', x['lower_limit']))
+        modal_class = data.index(max(data, key=lambda x: x['frequency']))
+        ll = data[modal_class]['lower_limit']
+        one_less = modal_class - 1
+        one_more = modal_class + 1
+        print(data[modal_class]['frequency'], ll, data[one_more]['frequency'], data[one_less]['frequency'])
+    except KeyError as e:
+        return send_error_message(e)
+    _mode = (((data[modal_class]['frequency'] - data[one_less]['frequency']) /
+             (2 * data[modal_class]['frequency'] - data[one_less]['frequency'] - data[one_more]['frequency']))
+             * interval) + ll
+    print(_mode)
+    return {'mode': _mode}
+
+
+@app.route('/median', methods=['POST'])
+async def do_median():
+    try:
+        data = json.loads(await request.data)
+    except Exception as e:
+        return send_error_message(e)
+    return do_calc(data, 'median')
+
+
+@app.route('/mean', methods=['POST'])
+async def do_mean():
+    try:
+        data = json.loads(await request.data)
+    except Exception as e:
+        return send_error_message(e)
+    return do_calc(data, 'mean')
 
 
 if __name__ == '__main__':
