@@ -27,7 +27,7 @@ async def close_pool():
 
 @app.route('/')
 def hello_world():
-    return '<samp>VJ#0001 on Discord. Feature requests rarely accepted.</samp>'
+    return '<samp>VJ#5945 on Discord. Feature requests rarely accepted.</samp>'
 
 
 @app.route('/gestation')
