@@ -35,11 +35,22 @@ free to make your own though.
 
 ## Rate limits, Authorisation
 
-None of that just yet. I've delegated DDoS protection to Cloudflare, and again, I expect that this won't be used by
-anyone but me, so implementing rate limits and authorisation (like a token system) is not in my focus right now.
+| Route | Authorisation Required |
+| --- | --- |
+| / | No |
+| /cat | No |
+| /dog | No |
+| /gestation | Yes |
+| /mean | Yes |
+| /median | Yes |
+| /mode | Yes |
+| /antidepressant-or-tolkien/* | No |
+| /patients/* | Yes (not public) |
 
-Patient data endpoints do have an auth system but I have no plans of exposing that to public due to issues of privacy.
-If you wish to make use of this, self-host.
+Authorisation is done using the HTTP `Authorization` header.
+
+For details, visit the `/tokens` endpoint.
+
 
 ## Contributing
 

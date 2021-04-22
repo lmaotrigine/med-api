@@ -22,4 +22,10 @@ CREATE TABLE  IF NOT EXISTS examinations (
     patient_id INTEGER,
     summary TEXT,
     details TEXT
-)
+);
+CREATE TABLE IF NOT EXISTS api_tokens (
+    app_id SERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    app_name TEXT,
+    secret BYTEA
+);

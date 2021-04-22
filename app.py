@@ -1,16 +1,19 @@
 import asyncpg
 import aiohttp
 from datetime import date, datetime, timedelta
-from quart import Quart, request, abort, redirect, jsonify, send_file
+from quart import Quart, render_template, request, abort, redirect, jsonify, send_file
 from utils.time import Time
+from utils.tokens import TokenUtils
 from models import Examination, Patient
 import config
+import functools
 import io
 import json
 import random
 import statistics
 
 app = Quart(__name__)
+token_handler = TokenUtils(app)
 
 
 @app.before_serving
@@ -25,12 +28,39 @@ async def close_pool():
     await app.session.close()
 
 
+def requires_auth(view):
+    @functools.wraps(view)
+    async def wrapper(*args, **kwargs):
+        token = request.headers.get('Authorization')
+        if token is None:
+            abort(401)
+        auth = await token_handler.validate_token(token)
+        if auth is False:
+            abort(401)
+        user_id, app_id = auth
+        if user_id is None or app_id is None:
+            abort(401)
+        return await view(*args, **kwargs)
+    return wrapper
+
+
 @app.route('/')
 def hello_world():
-    return '<samp>VJ#0001 on Discord. Feature requests rarely accepted.</samp>'
+    return '<samp>VJ#5945 on Discord. Feature requests rarely accepted.</samp>'
+
+
+@app.route('/tokens')
+async def token_page():
+    return await render_template('tokens.html')
+
+
+@app.route('/terms')
+async def terms_of_service():
+    return await render_template('terms.html')
 
 
 @app.route('/gestation')
+@requires_auth
 async def get_gestation_age():
     """Return the Expected Delivery Date and the gestation age (in weeks.days format) given a date string corresponding
     to the last menstrual period.
@@ -119,7 +149,7 @@ async def post_patient_stats():
 
 @app.route('/patients/<int:id>/<int:exam_id>', methods=['GET', 'PATCH'])
 async def get_examination(id, exam_id):
-    """GET deetails of a specific examination for a patient.
+    """GET details of a specific examination for a patient.
     
     PATCH: Change the summary or details of an examination.
     """
@@ -260,6 +290,7 @@ def do_calc(data, what):
 
 
 @app.route('/mode', methods=['POST'])
+@requires_auth
 async def do_mode():
     try:
         data = json.loads(await request.data)
@@ -297,6 +328,7 @@ async def do_mode():
 
 
 @app.route('/median', methods=['POST'])
+@requires_auth
 async def do_median():
     try:
         data = json.loads(await request.data)
@@ -306,6 +338,7 @@ async def do_median():
 
 
 @app.route('/mean', methods=['POST'])
+@requires_auth
 async def do_mean():
     try:
         data = json.loads(await request.data)
