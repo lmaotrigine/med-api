@@ -49,6 +49,12 @@ def hello_world():
     return '<samp>VJ#5945 on Discord. Feature requests rarely accepted.</samp>'
 
 
+@app.route('/.well-known/keybase.txt')
+@app.route('/keybase.txt')
+async def keybase_validation():
+    return await render_template('keybase.txt')
+
+
 @app.route('/tokens')
 async def token_page():
     return await render_template('tokens.html')

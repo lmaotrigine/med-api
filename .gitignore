@@ -3,3 +3,4 @@
 *.pyc
 venv/
 config.py
+templates/keybase.txt
