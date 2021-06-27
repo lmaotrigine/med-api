@@ -1,9 +1,10 @@
 import asyncpg
 import aiohttp
 from datetime import date, datetime, timedelta
-from quart import Quart, render_template, request, abort, redirect, jsonify, send_file
+from quart import Quart, render_template, request, Response, abort, redirect, jsonify, send_file
 from utils.time import Time
 from utils.tokens import TokenUtils
+from utils.lastfm import LastFMClient
 from models import Examination, Patient
 import config
 import functools
@@ -20,13 +21,18 @@ token_handler = TokenUtils(app)
 async def setup_pool():
     app.pool = await asyncpg.create_pool(config.postgresql)
     app.session = aiohttp.ClientSession()
-
+    app.lastfm_client = LastFMClient(app.session)
 
 @app.after_serving
 async def close_pool():
     await app.pool.close()
     await app.session.close()
 
+
+@app.after_request
+async def add_header(resp):
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    return resp
 
 def requires_auth(view):
     @functools.wraps(view)
@@ -48,6 +54,11 @@ def requires_auth(view):
 def hello_world():
     return '<samp>VJ#5945 on Discord. Feature requests rarely accepted.</samp>'
 
+
+@app.route('/music')
+async def jam_sessions():
+    #return redirect('https://learnermanipal-my.sharepoint.com/:f:/g/personal/varun_j_learner_manipal_edu/EtNIRtF9dERLqjP4QiLYWOsBWHMXKDK1sluEXdKbx7TVMQ')
+    return redirect('https://learnermanipal-my.sharepoint.com/:f:/g/personal/varun_j_learner_manipal_edu/EtNIRtF9dERLqjP4QiLYWOsBSH0VC0IOzm_6dPBEUcRviA?e=AzYwz6')
 
 @app.route('/.well-known/keybase.txt')
 @app.route('/keybase.txt')
@@ -223,6 +234,12 @@ async def drug_or_tolkien_random():
         with open('static/json/antidepressant_or_tolkien.json') as f:
             app.drug_or_tolkien_js = json.load(f)
     return random.choice(app.drug_or_tolkien_js)
+
+
+@app.route('/now-playing')
+async def now_playing():
+    resp = await app.lastfm_client.get_info()
+    return resp
 
 
 # central tendencies
