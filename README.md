@@ -7,7 +7,7 @@ literally wrote this out on my phone while in class, all the while thinking this
 would say this is just the beginning, and I'm sure there will be a few additions as I find more things that a computer
 is better at doing.
 
-For now, it's up at https://api.varunj.tk
+For now, it's up at https://api.varunj.me
 
 ## Feature requests
 

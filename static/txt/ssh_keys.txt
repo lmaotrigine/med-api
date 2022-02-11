@@ -1,0 +1,11 @@
+### Varun SSH keys - Last updated 2021-11-19
+## https://api.varunj.me/keys
+
+# Krypton - https://krypt.co
+# Backed by Android hardware keystore, very secure
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICdXl1PdCTvKTIqkEpp0EDgoo5e6CrelVvJZ5ciAddoN Isengard
+
+# Backup key to avoid lockouts (Secured with password, hopefully rarely used, don't add if you're a security nut)
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFVPjIREKmSoOlqB3upeI1GQn/0fVHIJbM7b1flSp/c5 root@varunj.me
+
+### End of Varun SSH keys
