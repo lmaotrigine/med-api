@@ -1,7 +1,7 @@
 import asyncpg
 import aiohttp
 from datetime import date, datetime, timedelta
-from quart import Quart, render_template, request, Response, abort, redirect, jsonify, send_file
+from quart import Quart, Response, render_template, request, Response, abort, redirect, jsonify, send_file
 from utils.time import Time
 from utils.tokens import TokenUtils
 from utils.lastfm import LastFMClient
@@ -245,7 +245,7 @@ async def now_playing():
 async def ssh_keys():
     with open('static/txt/ssh_keys.txt') as f:
         keys = f.read()
-    return keys
+    return Response(keys, content_type='text/plain')
 
 
 # central tendencies
