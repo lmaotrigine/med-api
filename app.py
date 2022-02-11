@@ -179,7 +179,7 @@ async def get_examination(id, exam_id):
     data = await request.json
     exam = Examination.build_from_record(exam)
     async with app.pool.acquire() as con:
-        exam = await exam.amend(con, **data)
+        exam = await exam.amend(con=con, **data)
     return exam.__dict__
 
 
