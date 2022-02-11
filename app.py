@@ -1,7 +1,7 @@
 import asyncpg
 import aiohttp
 from datetime import date, datetime, timedelta
-from quart import Quart, Response, render_template, request, Response, abort, redirect, jsonify, send_file
+from quart import Quart, Response, render_template, request, Response, abort, redirect, jsonify, send_file, send_from_directory
 from utils.time import Time
 from utils.tokens import TokenUtils
 from utils.lastfm import LastFMClient
@@ -247,6 +247,9 @@ async def ssh_keys():
         keys = f.read()
     return Response(keys, content_type='text/plain')
 
+@app.route('/pgp/<key_file>')
+async def pgp_key(key_file):
+    return await send_from_directory('static/txt/pgp', key_file)
 
 # central tendencies
 """
