@@ -58,7 +58,7 @@ def hello_world():
 @app.route('/music')
 async def jam_sessions():
     #return redirect('https://learnermanipal-my.sharepoint.com/:f:/g/personal/varun_j_learner_manipal_edu/EtNIRtF9dERLqjP4QiLYWOsBWHMXKDK1sluEXdKbx7TVMQ')
-    return redirect('https://learnermanipal-my.sharepoint.com/:f:/g/personal/varun_j_learner_manipal_edu/EtNIRtF9dERLqjP4QiLYWOsBSH0VC0IOzm_6dPBEUcRviA?e=AzYwz6')
+    return redirect('https://learnermanipal-my.sharepoint.com/:f:/g/personal/varun_j_learner_manipal_edu/EtNIRtF9dERLqjP4QiLYWOsB-yHqPT2cJFPOMcPdVREexQ')
 
 @app.route('/.well-known/keybase.txt')
 @app.route('/keybase.txt')
