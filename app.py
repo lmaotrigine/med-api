@@ -1,8 +1,7 @@
 import asyncpg
 import aiohttp
 from datetime import date, datetime, timedelta
-from quart import Quart, Response, render_template, request, Response, abort, redirect, jsonify, send_file
-from quart.helpers import send_from_directory
+from quart import Quart, Response, render_template, request, Response, abort, redirect, jsonify, send_file, send_from_directory
 from utils.time import Time
 from utils.tokens import TokenUtils
 from utils.lastfm import LastFMClient
