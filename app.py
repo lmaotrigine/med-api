@@ -241,6 +241,12 @@ async def now_playing():
     resp = await app.lastfm_client.get_info()
     return resp
 
+@app.route('/keys')
+async def ssh_keys():
+    with open('static/txt/ssh_keys.txt') as f:
+        keys = f.read()
+    return keys
+
 
 # central tendencies
 """
