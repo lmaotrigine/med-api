@@ -5,7 +5,8 @@
 # Backed by Android hardware keystore, very secure
 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICdXl1PdCTvKTIqkEpp0EDgoo5e6CrelVvJZ5ciAddoN Isengard
 
-# Backup key to avoid lockouts (Secured with password, hopefully rarely used, don't add if you're a security nut)
+# Backup keys to avoid lockouts (Secured with password, hopefully rarely used, don't add if you're a security nut)
 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFVPjIREKmSoOlqB3upeI1GQn/0fVHIJbM7b1flSp/c5 root@varunj.me
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILYLt5c74KgAtk1YN+qAXJPpjmzq7PUYRZPUHLxjB+JO root@varunj.me
 
 ### End of Varun SSH keys
